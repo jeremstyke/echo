@@ -11,6 +11,7 @@
 :root{--bg:#f2f5f8;--surface:#ffffff;--ink:#0b1f33;--muted:#53657a;--line:#d6dee7;--cobalt:#1f4fff;--cobalt-ink:#ffffff;--mint:#c9f2de;--mint-ink:#0b3b2a;--night:#0b1f33;--night-fg:#eaf0f7;--night-mut:#9fb2c7;--night-line:#27425e;--r:14px}
 @media(prefers-color-scheme:dark){:root{--bg:#08141f;--surface:#0f2132;--ink:#eaf0f7;--muted:#9fb2c7;--line:#223a52;--cobalt:#6d8dff;--cobalt-ink:#06122b;--mint:#164634;--mint-ink:#c9f2de;--night:#050e17;--night-fg:#eaf0f7;--night-mut:#9fb2c7;--night-line:#1d344b;color-scheme:dark}}
 *{box-sizing:border-box}
+[hidden]{display:none!important}
 html{scroll-behavior:smooth}
 @media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}*{animation:none!important;transition:none!important}}
 body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.65 "Instrument Sans",system-ui,sans-serif;overflow-x:clip;-webkit-font-smoothing:antialiased}
@@ -165,6 +166,7 @@ footer .top{display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap}
 <div>
 <form class="row" id="df"><input id="u" type="text" inputmode="url" autocomplete="off" aria-label="URL"><button class="btn" type="submit" id="go"><span data-l="fr">Créer ma démo</span><span data-l="en">Create my demo</span></button></form>
 <div id="msg" aria-live="polite"></div>
+<div id="share" hidden style="margin-top:12px;display:flex;gap:10px;flex-wrap:wrap"><a class="btn" id="newwin" target="_blank" rel="noopener" href="#"><span data-l="fr">Ouvrir dans une nouvelle fenêtre</span><span data-l="en">Open in a new window</span></a><button class="btn" id="cp" type="button" style="background:transparent;color:var(--night-fg);border:1px solid var(--night-line)"><span data-l="fr">Copier le lien</span><span data-l="en">Copy link</span></button></div>
 <iframe id="frame" title="Demo"></iframe>
 <p class="note"><span data-l="fr">Les sites protégés ou entièrement chargés par script peuvent ne pas être lisibles.</span><span data-l="en">Protected or fully script-rendered sites may not be readable.</span></p>
 </div>
@@ -278,10 +280,11 @@ $('lt').onclick=function(e){e.preventDefault();var l=$('legal');l.style.display=
 var T={fr:{wait:'Lecture de votre site en cours...',url:'Entrez l\'adresse de votre site.',fetch:'Impossible de lire ce site. Il est peut-être protégé ou inaccessible.',empty:'Ce site contient trop peu de texte lisible. Il est peut-être chargé par script ou composé d\'images.',limit:'Trop de demandes. Réessayez plus tard.',err:'Une erreur est survenue. Réessayez.',ok:'Votre assistant est prêt. Posez-lui une question sur votre activité.'},
 en:{wait:'Reading your site...',url:'Enter your website address.',fetch:'Could not read this site. It may be protected or unreachable.',empty:'This site has too little readable text. It may be script-rendered or image-based.',limit:'Too many requests. Try again later.',err:'Something went wrong. Try again.',ok:'Your assistant is ready. Ask it a question about your business.'}};
 $('df').onsubmit=function(e){e.preventDefault();var u=$('u').value.trim(),t=T[L()],b=$('go');if(!u){$('msg').textContent=t.url;return}
- b.disabled=true;$('msg').textContent=t.wait;$('frame').style.display='none';
+ b.disabled=true;$('msg').textContent=t.wait;$('frame').style.display='none';$('share').hidden=true;
  fetch(API+'/api/demo',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({url:u})}).then(function(r){return r.json().then(function(j){return{s:r.status,j:j}})}).then(function(x){
-  if(x.j&&x.j.id){$('msg').textContent=t.ok;var f=$('frame');f.src=API+'/c/'+x.j.id;f.style.display='block';f.scrollIntoView({behavior:'smooth',block:'nearest'})}
+  if(x.j&&x.j.id){$('msg').textContent=t.ok;var f=$('frame');var link=(API||location.origin)+'/c/'+x.j.id;f.src=link;f.style.display='block';$('newwin').href=link;$('share').hidden=false;$('cp').dataset.link=link;f.scrollIntoView({behavior:'smooth',block:'nearest'})}
   else $('msg').textContent=x.s===429?t.limit:(t[x.j&&x.j.error]||t.err)}).catch(function(){$('msg').textContent=t.err}).then(function(){b.disabled=false})};
+$('cp').onclick=function(){var l=this.dataset.link||'';try{navigator.clipboard.writeText(l).then(function(){$('msg').textContent=L()==='fr'?'Lien copié.':'Link copied.'},function(){$('msg').textContent=l})}catch(e){$('msg').textContent=l}};
 var chatF=null;
 function openChat(){if(!chatF){chatF=document.createElement('iframe');chatF.src=API+'/c/echo';chatF.title='Echo';chatF.style.cssText='position:fixed;right:max(16px,env(safe-area-inset-right));bottom:16px;z-index:50;width:min(390px,calc(100vw - 32px));height:min(580px,calc(100vh - 32px));border:1px solid #d6dee7;border-radius:18px;box-shadow:0 24px 70px rgba(0,0,0,.4);background:#fff';var x=document.createElement('button');x.textContent='✕';x.setAttribute('aria-label','Close');x.style.cssText='position:fixed;right:max(24px,env(safe-area-inset-right));bottom:min(600px,calc(100vh - 48px));z-index:51;width:30px;height:30px;border-radius:50%;border:0;background:#0b1f33;color:#fff;cursor:pointer;box-shadow:0 2px 8px rgba(0,0,0,.4)';x.onclick=function(){chatF.style.display='none';x.style.display='none'};chatF._x=x;document.body.appendChild(chatF);document.body.appendChild(x)}
  chatF.style.display='block';chatF._x.style.display='block'}
