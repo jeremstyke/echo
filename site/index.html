@@ -1,0 +1,290 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Echo | Assistant IA pour votre site</title>
+<meta name="description" content="Echo répond aux questions de vos visiteurs 24h/24, d'après le contenu de votre site, et vous transmet les demandes sérieuses. / Echo answers your visitors' questions around the clock, from your own website content.">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700;12..96,800&family=Instrument+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#f2f5f8;--surface:#ffffff;--ink:#0b1f33;--muted:#53657a;--line:#d6dee7;--cobalt:#1f4fff;--cobalt-ink:#ffffff;--mint:#c9f2de;--mint-ink:#0b3b2a;--night:#0b1f33;--night-fg:#eaf0f7;--night-mut:#9fb2c7;--night-line:#27425e;--r:14px}
+@media(prefers-color-scheme:dark){:root{--bg:#08141f;--surface:#0f2132;--ink:#eaf0f7;--muted:#9fb2c7;--line:#223a52;--cobalt:#6d8dff;--cobalt-ink:#06122b;--mint:#164634;--mint-ink:#c9f2de;--night:#050e17;--night-fg:#eaf0f7;--night-mut:#9fb2c7;--night-line:#1d344b;color-scheme:dark}}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+@media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}*{animation:none!important;transition:none!important}}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.65 "Instrument Sans",system-ui,sans-serif;overflow-x:clip;-webkit-font-smoothing:antialiased}
+html[lang=fr] [data-l=en],html[lang=en] [data-l=fr]{display:none!important}
+h1,h2,h3{font-family:"Bricolage Grotesque","Instrument Sans",sans-serif;margin:0;line-height:1.08;letter-spacing:-.02em;text-wrap:balance}
+p{margin:0}
+a{color:inherit}
+:focus-visible{outline:3px solid var(--cobalt);outline-offset:3px;border-radius:6px}
+.w{max-width:1120px;margin:0 auto;padding-inline:max(20px,env(safe-area-inset-left))}
+.sk{position:absolute;left:-999px}.sk:focus{left:12px;top:12px;background:var(--surface);padding:8px 12px;z-index:99}
+/* header */
+header{position:sticky;top:0;z-index:20;background:color-mix(in srgb,var(--bg) 90%,transparent);backdrop-filter:blur(12px);border-bottom:1px solid var(--line)}
+header .w{display:flex;align-items:center;justify-content:space-between;height:64px;gap:16px}
+.logo{display:flex;align-items:center;gap:10px;text-decoration:none;font:800 22px "Bricolage Grotesque";letter-spacing:-.03em}
+.logo svg{width:26px;height:26px}
+nav{display:flex;align-items:center;gap:26px}
+nav a{text-decoration:none;color:var(--muted);font-size:15px;font-weight:500}nav a:hover{color:var(--ink)}
+@media(max-width:820px){nav a.h{display:none}}
+.lang{border:1px solid var(--line);background:var(--surface);color:var(--ink);border-radius:8px;padding:6px 11px;font:600 13px "Instrument Sans";cursor:pointer}
+.btn{display:inline-flex;align-items:center;justify-content:center;background:var(--cobalt);color:var(--cobalt-ink);border:0;border-radius:10px;padding:13px 22px;font:600 15px "Instrument Sans";text-decoration:none;cursor:pointer;transition:transform .15s,filter .15s}
+.btn:hover{filter:brightness(1.08);transform:translateY(-1px)}
+.btn.ghost{background:transparent;color:var(--ink);border:1px solid var(--line)}
+.btn[disabled]{opacity:.6;cursor:wait}
+/* hero */
+.hero{padding-block:72px 64px}
+.hero .w{display:grid;grid-template-columns:1.05fr .95fr;gap:56px;align-items:center}
+@media(max-width:900px){.hero .w{grid-template-columns:1fr;gap:40px}.hero{padding-block:44px 40px}}
+.hero h1{font-size:clamp(38px,5.6vw,68px);font-weight:800}
+.hero .lead{margin-top:22px;font-size:19px;color:var(--muted);max-width:30em}
+.hero .acts{margin-top:30px;display:flex;gap:12px;flex-wrap:wrap}
+.hero .meta{margin-top:22px;font-size:14px;color:var(--muted)}
+/* chat mockup */
+.mock{background:var(--surface);border:1px solid var(--line);border-radius:20px;box-shadow:0 30px 70px -30px rgba(11,31,51,.45);overflow:hidden}
+.mock .bar{display:flex;align-items:center;gap:10px;padding:14px 18px;border-bottom:1px solid var(--line);font:600 14px "Instrument Sans"}
+.mock .dot{width:9px;height:9px;border-radius:50%;background:#22c55e}
+.mock .bar small{margin-left:auto;font-weight:500;color:var(--muted)}
+.mock .log{padding:18px;display:flex;flex-direction:column;gap:10px;min-height:340px}
+.b{max-width:84%;padding:10px 14px;border-radius:14px;font-size:15px;line-height:1.5}
+.b.v{align-self:flex-end;background:var(--cobalt);color:var(--cobalt-ink);border-bottom-right-radius:4px}
+.b.e{align-self:flex-start;background:var(--bg);border:1px solid var(--line);border-bottom-left-radius:4px}
+.b.n{align-self:center;background:var(--mint);color:var(--mint-ink);font-size:13px;font-weight:600;border-radius:8px;max-width:100%}
+.b{animation:pop .28s ease both}@keyframes pop{from{opacity:0;transform:translateY(6px)}}
+/* demo band */
+.demo{background:var(--night);color:var(--night-fg);padding-block:72px}
+.demo .w{display:grid;grid-template-columns:.9fr 1.1fr;gap:48px;align-items:start}
+@media(max-width:900px){.demo .w{grid-template-columns:1fr;gap:28px}.demo{padding-block:48px}}
+.demo h2{font-size:clamp(30px,4vw,46px);font-weight:800}
+.demo p.s{margin-top:14px;color:var(--night-mut);max-width:28em}
+.row{display:flex;gap:10px;flex-wrap:wrap}
+.row input{flex:1;min-width:0;background:#0f2a43;border:1px solid var(--night-line);color:var(--night-fg);border-radius:10px;padding:14px 16px;font:inherit;outline:none}
+.row input::placeholder{color:#6f87a0}.row input:focus{border-color:var(--cobalt)}
+.demo .btn{background:#fff;color:#0b1f33}
+#msg{margin-top:12px;min-height:24px;font-size:14px;color:var(--night-mut)}
+#frame{display:none;margin-top:14px;width:100%;height:460px;border:1px solid var(--night-line);border-radius:14px;background:#fff}
+.note{margin-top:12px;font-size:13px;color:var(--night-mut)}
+/* sections */
+section.s{padding-block:88px}
+@media(max-width:700px){section.s{padding-block:56px}}
+.h2{font-size:clamp(28px,3.8vw,44px);font-weight:800;max-width:18em}
+.sub{margin-top:14px;color:var(--muted);max-width:36em;font-size:17px}
+/* features as ruled list */
+.feat{margin-top:44px;border-top:1px solid var(--line)}
+.feat>div{display:grid;grid-template-columns:minmax(0,.8fr) minmax(0,1.2fr);gap:28px;padding:26px 0;border-bottom:1px solid var(--line)}
+@media(max-width:700px){.feat>div{grid-template-columns:1fr;gap:6px}}
+.feat h3{font-size:22px;font-weight:700}
+.feat p{color:var(--muted)}
+/* sectors */
+.tabs{margin-top:34px;display:flex;gap:8px;flex-wrap:wrap}
+.tabs button{border:1px solid var(--line);background:var(--surface);color:var(--ink);border-radius:999px;padding:9px 18px;font:500 15px "Instrument Sans";cursor:pointer}
+.tabs button[aria-selected=true]{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+.case{margin-top:22px;display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:24px;align-items:start}
+@media(max-width:800px){.case{grid-template-columns:1fr}}
+.case .mock .log{min-height:0}
+.case .tx{padding:8px 4px}
+.case .tx h3{font-size:24px}.case .tx p{margin-top:10px;color:var(--muted)}
+.case .tx ul{margin:16px 0 0;padding-left:20px;color:var(--muted)}.case .tx li{margin-top:6px}
+.ex{font-size:12px;color:var(--muted);margin-top:10px}
+/* steps */
+.steps{margin-top:44px;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:0;border:1px solid var(--line);border-radius:var(--r);background:var(--surface);overflow:hidden}
+@media(max-width:800px){.steps{grid-template-columns:1fr}}
+.steps>div{padding:28px;border-right:1px solid var(--line)}
+.steps>div:last-child{border-right:0}
+@media(max-width:800px){.steps>div{border-right:0;border-bottom:1px solid var(--line)}.steps>div:last-child{border-bottom:0}}
+.steps b{display:block;font:800 40px "Bricolage Grotesque";color:var(--cobalt);line-height:1}
+.steps h3{font-size:20px;margin:14px 0 8px}.steps p{color:var(--muted);font-size:15px}
+/* limits */
+.lim{background:var(--surface);border-block:1px solid var(--line)}
+.lim .cols{margin-top:36px;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:40px}
+@media(max-width:800px){.lim .cols{grid-template-columns:1fr;gap:24px}}
+.lim h3{font-size:20px;margin-bottom:12px}
+.lim ul{margin:0;padding:0;list-style:none}
+.lim li{padding:10px 0 10px 28px;border-top:1px solid var(--line);position:relative;color:var(--muted)}
+.lim li:before{content:"";position:absolute;left:2px;top:19px;width:12px;height:2px;background:var(--cobalt)}
+.lim .no li:before{background:var(--muted)}
+/* pricing */
+.price{margin-top:44px;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:18px;align-items:stretch}
+@media(max-width:900px){.price{grid-template-columns:1fr}}
+.pc{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:28px;display:flex;flex-direction:column}
+.pc.main{background:var(--night);color:var(--night-fg);border-color:var(--night)}
+.pc h3{font-size:20px}
+.pc .amt{margin:14px 0 4px;font:800 40px "Bricolage Grotesque";letter-spacing:-.03em}
+.pc .amt small{font:500 15px "Instrument Sans";color:var(--muted);letter-spacing:0}
+.pc.main .amt small,.pc.main li{color:var(--night-mut)}
+.pc ul{margin:18px 0 0;padding:0;list-style:none;color:var(--muted);font-size:15px}
+.pc li{padding:8px 0;border-top:1px solid var(--line)}.pc.main li{border-color:var(--night-line)}
+.pc .btn{margin-top:auto}.pc ul{margin-bottom:24px}
+.pc.main .btn{background:#fff;color:#0b1f33}
+.fine{margin-top:18px;font-size:14px;color:var(--muted)}
+/* faq */
+.faq{margin-top:36px;max-width:780px;border-top:1px solid var(--line)}
+details{border-bottom:1px solid var(--line);padding:18px 0}
+summary{cursor:pointer;font:700 18px "Bricolage Grotesque";list-style:none;display:flex;justify-content:space-between;gap:16px}
+summary::-webkit-details-marker{display:none}
+summary:after{content:"+";font-weight:500;color:var(--cobalt);font-size:22px;line-height:1}
+details[open] summary:after{content:"\2212"}
+details p{margin-top:10px;color:var(--muted);max-width:42em}
+/* closing */
+.end{background:var(--night);color:var(--night-fg);padding-block:80px}
+.end .w{display:flex;justify-content:space-between;align-items:center;gap:32px;flex-wrap:wrap}
+.end h2{font-size:clamp(30px,4vw,48px);font-weight:800;max-width:14em}
+.end p{margin-top:12px;color:var(--night-mut)}
+.end .btn{background:#fff;color:#0b1f33}
+footer{padding-block:32px;font-size:14px;color:var(--muted)}
+footer .top{display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap}
+#legal{display:none;margin-top:18px;line-height:1.55;max-width:60em}
+#legal p+p{margin-top:12px}
+</style>
+</head>
+<body>
+<a class="sk" href="#demo"><span data-l="fr">Aller à la démo</span><span data-l="en">Skip to demo</span></a>
+<header><div class="w">
+<a class="logo" href="#top" aria-label="Echo"><svg viewBox="0 0 32 32" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" aria-hidden="true"><circle cx="9" cy="16" r="3" fill="currentColor" stroke="none"/><path d="M16 9.5a9 9 0 0 1 0 13"/><path d="M22 5a16 16 0 0 1 0 22" opacity=".55"/></svg>Echo</a>
+<nav><a class="h" href="#sectors"><span data-l="fr">Cas d'usage</span><span data-l="en">Use cases</span></a><a class="h" href="#how"><span data-l="fr">Fonctionnement</span><span data-l="en">How it works</span></a><a class="h" href="#pricing"><span data-l="fr">Tarifs</span><span data-l="en">Pricing</span></a><button class="lang" id="lg" aria-label="Language">EN</button><a class="btn" href="#demo" style="padding:9px 16px"><span data-l="fr">Essayer</span><span data-l="en">Try it</span></a></nav>
+</div></header>
+
+<main id="top">
+<section class="hero"><div class="w">
+<div>
+<h1><span data-l="fr">Vos clients posent leurs questions la nuit. Echo répond.</span><span data-l="en">Your customers ask questions at night. Echo answers.</span></h1>
+<p class="lead"><span data-l="fr">Un assistant IA installé sur votre site. Il répond d'après vos propres pages, dans la langue du visiteur, et vous transmet les demandes sérieuses avec nom, email et besoin.</span><span data-l="en">An AI assistant installed on your website. It answers from your own pages, in the visitor's language, and passes you serious requests with name, email and need.</span></p>
+<div class="acts"><a class="btn" href="#demo"><span data-l="fr">Tester sur mon site</span><span data-l="en">Test it on my site</span></a><a class="btn ghost" href="#pricing"><span data-l="fr">Voir les tarifs</span><span data-l="en">See pricing</span></a></div>
+<p class="meta"><span data-l="fr">Sans inscription. La démo se crée en quelques secondes.</span><span data-l="en">No sign-up. The demo is ready in seconds.</span></p>
+</div>
+<div class="mock" aria-label="Exemple de conversation"><div class="bar"><i class="dot"></i><span id="hn">Atelier Marchand</span><small>Echo</small></div><div class="log" id="hlog" aria-live="off"></div></div>
+</div></section>
+
+<section class="demo" id="demo"><div class="w">
+<div>
+<h2><span data-l="fr">Essayez-le sur votre propre site</span><span data-l="en">Try it on your own website</span></h2>
+<p class="s"><span data-l="fr">Collez l'adresse de votre site. Echo lit votre page d'accueil et quelques pages clés (contact, tarifs, services), puis vous pouvez l'interroger comme un visiteur.</span><span data-l="en">Paste your website address. Echo reads your home page and a few key pages (contact, prices, services), then you can question it like a visitor.</span></p>
+</div>
+<div>
+<form class="row" id="df"><input id="u" type="text" inputmode="url" autocomplete="off" aria-label="URL"><button class="btn" type="submit" id="go"><span data-l="fr">Créer ma démo</span><span data-l="en">Create my demo</span></button></form>
+<div id="msg" aria-live="polite"></div>
+<iframe id="frame" title="Demo"></iframe>
+<p class="note"><span data-l="fr">Les sites protégés ou entièrement chargés par script peuvent ne pas être lisibles.</span><span data-l="en">Protected or fully script-rendered sites may not be readable.</span></p>
+</div>
+</div></section>
+
+<section class="s" id="features"><div class="w">
+<h2 class="h2"><span data-l="fr">Ce qu'Echo fait à votre place</span><span data-l="en">What Echo does for you</span></h2>
+<div class="feat">
+<div><h3><span data-l="fr">Répond avec vos informations</span><span data-l="en">Answers with your information</span></h3><p><span data-l="fr">Horaires, tarifs, zone d'intervention, services : il s'appuie sur le contenu de votre site. Quand l'information n'existe pas, il le dit et renvoie vers vos coordonnées, au lieu d'inventer.</span><span data-l="en">Opening hours, prices, service area, services: it relies on your site content. When the information does not exist, it says so and points to your contact details instead of making things up.</span></p></div>
+<div><h3><span data-l="fr">Parle la langue du visiteur</span><span data-l="en">Speaks the visitor's language</span></h3><p><span data-l="fr">Un client anglais, allemand ou espagnol obtient une réponse dans sa langue, même si votre site n'existe qu'en français.</span><span data-l="en">An English, German or Spanish customer gets an answer in their language, even if your site only exists in French.</span></p></div>
+<div><h3><span data-l="fr">Qualifie et vous transmet les demandes</span><span data-l="en">Qualifies and forwards requests</span></h3><p><span data-l="fr">Quand un visiteur veut un devis ou un rappel, Echo recueille son nom, son email et son besoin, puis vous les envoie. Rien d'autre n'est demandé.</span><span data-l="en">When a visitor wants a quote or a callback, Echo collects their name, email and need, then sends them to you. Nothing else is asked.</span></p></div>
+<div><h3><span data-l="fr">S'installe en une ligne</span><span data-l="en">Installs with one line</span></h3><p><span data-l="fr">Une ligne de code à coller sur votre site, quelle que soit la plateforme. Un plugin WordPress est en préparation.</span><span data-l="en">One line of code to paste on your site, whatever the platform. A WordPress plugin is in preparation.</span></p></div>
+</div>
+</div></section>
+
+<section class="s" id="sectors" style="padding-top:0"><div class="w">
+<h2 class="h2"><span data-l="fr">À quoi ça ressemble chez vous</span><span data-l="en">What it looks like for you</span></h2>
+<div class="tabs" role="tablist" id="tabs"></div>
+<div class="case" id="case"></div>
+<p class="ex"><span data-l="fr">Exemples illustratifs, avec des entreprises fictives.</span><span data-l="en">Illustrative examples with fictional businesses.</span></p>
+</div></section>
+
+<section class="s" id="how" style="padding-top:0"><div class="w">
+<h2 class="h2"><span data-l="fr">De la démo au site en ligne</span><span data-l="en">From demo to live site</span></h2>
+<div class="steps">
+<div><b>1</b><h3><span data-l="fr">Vous testez la démo</span><span data-l="en">You test the demo</span></h3><p><span data-l="fr">Vous collez votre adresse et jugez la qualité des réponses sur vos propres pages.</span><span data-l="en">You paste your address and judge the answers on your own pages.</span></p></div>
+<div><b>2</b><h3><span data-l="fr">Nous le réglons</span><span data-l="en">We tune it</span></h3><p><span data-l="fr">Ton, langues, informations à ajouter (tarifs, FAQ, documents). Vous validez avant la mise en ligne.</span><span data-l="en">Tone, languages, information to add (prices, FAQ, documents). You approve before it goes live.</span></p></div>
+<div><b>3</b><h3><span data-l="fr">Il est en ligne</span><span data-l="en">It goes live</span></h3><p><span data-l="fr">Vous collez une ligne de code. Les demandes arrivent par message, vous répondez quand vous voulez.</span><span data-l="en">You paste one line of code. Requests reach you by message and you answer whenever you like.</span></p></div>
+</div>
+</div></section>
+
+<section class="s lim" id="limits"><div class="w">
+<h2 class="h2"><span data-l="fr">Ce qu'Echo fait, et ce qu'il ne fait pas</span><span data-l="en">What Echo does, and what it does not</span></h2>
+<div class="cols">
+<div><h3><span data-l="fr">Il fait</span><span data-l="en">It does</span></h3><ul>
+<li><span data-l="fr">Répondre uniquement d'après votre contenu</span><span data-l="en">Answer only from your content</span></li>
+<li><span data-l="fr">Reconnaître quand il ne sait pas</span><span data-l="en">Admit when it does not know</span></li>
+<li><span data-l="fr">Recueillir nom, email et besoin</span><span data-l="en">Collect name, email and need</span></li></ul></div>
+<div class="no"><h3><span data-l="fr">Il ne fait pas</span><span data-l="en">It does not</span></h3><ul>
+<li><span data-l="fr">Promettre un prix ou un délai absent de votre site</span><span data-l="en">Promise a price or delay missing from your site</span></li>
+<li><span data-l="fr">Prendre un paiement ni une réservation ferme</span><span data-l="en">Take a payment or a firm booking</span></li>
+<li><span data-l="fr">Demander des données sensibles à vos visiteurs</span><span data-l="en">Ask your visitors for sensitive data</span></li></ul></div>
+</div></div></section>
+
+<section class="s" id="pricing"><div class="w">
+<h2 class="h2"><span data-l="fr">Tarifs</span><span data-l="en">Pricing</span></h2>
+<p class="sub"><span data-l="fr">Prix indicatifs. Chaque projet reçoit un devis précis sous 24 heures, sans engagement de durée.</span><span data-l="en">Indicative prices. Every project gets a precise quote within 24 hours, with no lock-in contract.</span></p>
+<div class="price">
+<div class="pc"><h3><span data-l="fr">Mise en place</span><span data-l="en">Setup</span></h3><div class="amt"><small><span data-l="fr">dès </span><span data-l="en">from </span></small>200 €</div><ul><li><span data-l="fr">Analyse de votre site</span><span data-l="en">Review of your site</span></li><li><span data-l="fr">Réglage du ton et des langues</span><span data-l="en">Tone and language tuning</span></li><li><span data-l="fr">Installation sur votre site</span><span data-l="en">Installation on your site</span></li></ul><button class="btn ghost ask"><span data-l="fr">Demander un devis</span><span data-l="en">Request a quote</span></button></div>
+<div class="pc main"><h3><span data-l="fr">Abonnement</span><span data-l="en">Monthly plan</span></h3><div class="amt"><small><span data-l="fr">dès </span><span data-l="en">from </span></small>40 €<small> /<span data-l="fr"> mois</span><span data-l="en"> month</span></small></div><ul><li><span data-l="fr">Assistant actif 24h/24</span><span data-l="en">Assistant live 24/7</span></li><li><span data-l="fr">Demandes transmises par message</span><span data-l="en">Requests forwarded by message</span></li><li><span data-l="fr">Mises à jour du contenu</span><span data-l="en">Content updates</span></li></ul><button class="btn ask"><span data-l="fr">Demander un devis</span><span data-l="en">Request a quote</span></button></div>
+<div class="pc"><h3><span data-l="fr">Sur mesure</span><span data-l="en">Custom work</span></h3><div class="amt"><span data-l="fr">Sur devis</span><span data-l="en">On quote</span></div><ul><li><span data-l="fr">Assistant interne pour votre équipe</span><span data-l="en">Internal assistant for your team</span></li><li><span data-l="fr">Mini-apps et automatisations</span><span data-l="en">Mini apps and automations</span></li><li><span data-l="fr">Connexion à vos outils</span><span data-l="en">Connection to your tools</span></li></ul><button class="btn ghost ask"><span data-l="fr">Parler de mon projet</span><span data-l="en">Discuss my project</span></button></div>
+</div>
+<p class="fine"><span data-l="fr">Facturation et paiement gérés directement après devis.</span><span data-l="en">Invoicing and payment are handled directly after the quote.</span></p>
+</div></section>
+
+<section class="s" id="faq" style="padding-top:0"><div class="w">
+<h2 class="h2">FAQ</h2>
+<div class="faq">
+<details><summary><span data-l="fr">Et si l'assistant se trompe ?</span><span data-l="en">What if the assistant is wrong?</span></summary><p><span data-l="fr">Il répond d'après votre contenu seulement. Si une information manque, il l'indique et renvoie vers vos coordonnées. Vous décidez des informations qu'il utilise et pouvez les corriger à tout moment.</span><span data-l="en">It answers from your content only. If information is missing, it says so and points to your contact details. You decide which information it uses and can correct it at any time.</span></p></details>
+<details><summary><span data-l="fr">Que deviennent les données des visiteurs ?</span><span data-l="en">What happens to visitors' data?</span></summary><p><span data-l="fr">Les messages sont traités par un fournisseur d'IA pour générer les réponses. Un contact n'est enregistré que si le visiteur le fournit lui-même, et il sert uniquement à traiter sa demande. Les visiteurs sont invités à ne pas saisir de données sensibles.</span><span data-l="en">Messages are processed by an AI provider to generate answers. A contact is stored only if the visitor provides it, and is used only to handle their request. Visitors are asked not to enter sensitive data.</span></p></details>
+<details><summary><span data-l="fr">Puis-je arrêter quand je veux ?</span><span data-l="en">Can I cancel anytime?</span></summary><p><span data-l="fr">Oui. Il n'y a pas d'engagement de durée : retirez la ligne de code ou écrivez-nous.</span><span data-l="en">Yes. There is no lock-in: remove the line of code or write to us.</span></p></details>
+<details><summary><span data-l="fr">Sur quelles plateformes ça marche ?</span><span data-l="en">Which platforms does it work on?</span></summary><p><span data-l="fr">Partout où vous pouvez coller une ligne de code : WordPress, Wix, Shopify, Webflow, site sur mesure. Un plugin WordPress dédié est en préparation.</span><span data-l="en">Anywhere you can paste a line of code: WordPress, Wix, Shopify, Webflow, custom sites. A dedicated WordPress plugin is in preparation.</span></p></details>
+<details><summary><span data-l="fr">Quelles langues sont prises en charge ?</span><span data-l="en">Which languages are supported?</span></summary><p><span data-l="fr">L'assistant répond dans la langue de l'utilisateur : français, anglais et la plupart des langues courantes.</span><span data-l="en">The assistant replies in the user's language: French, English and most common languages.</span></p></details>
+</div></div></section>
+
+<section class="end"><div class="w">
+<div><h2><span data-l="fr">Une question avant de vous lancer ?</span><span data-l="en">A question before you start?</span></h2><p><span data-l="fr">Posez-la à Echo : il connaît nos offres et peut transmettre votre demande de devis.</span><span data-l="en">Ask Echo: it knows our offers and can pass on your quote request.</span></p></div>
+<button class="btn ask" id="open"><span data-l="fr">Discuter avec Echo</span><span data-l="en">Chat with Echo</span></button>
+</div></section>
+</main>
+
+<footer><div class="w">
+<div class="top"><span>© 2026 Echo</span><a href="#" id="lt"><span data-l="fr">Mentions légales</span><span data-l="en">Legal notice</span></a></div>
+<div id="legal">
+<p data-l="fr"><b>Éditeur :</b> Jérémy Dacier-Jury, entrepreneur individuel. SIRET : [à compléter]. Contact : [à compléter]. <b>Hébergement :</b> Railway Corporation (infrastructure) et Supabase Inc. (base de données). <b>Données :</b> les messages saisis dans l'assistant sont transmis à un fournisseur d'IA pour produire les réponses. Les coordonnées ne sont enregistrées que si vous les fournissez et servent uniquement à répondre à votre demande. Pour exercer vos droits (accès, suppression), écrivez à l'adresse de contact ci-dessus.</p>
+<p data-l="en"><b>Publisher:</b> Jérémy Dacier-Jury, sole proprietor. Company ID (SIRET): [to be completed]. Contact: [to be completed]. <b>Hosting:</b> Railway Corporation (infrastructure) and Supabase Inc. (database). <b>Data:</b> messages typed into the assistant are sent to an AI provider to generate answers. Contact details are stored only if you provide them and are used solely to answer your request. To exercise your rights (access, deletion), write to the contact address above.</p>
+</div></div></footer>
+
+<script>
+var h=document.documentElement,$=function(x){return document.getElementById(x)};
+var reduce=window.matchMedia&&matchMedia('(prefers-reduced-motion: reduce)').matches;
+var HERO={fr:{n:'Atelier Marchand',m:[['v','Vous faites des devis pour une cuisine sur mesure ?'],['e','Oui, sur rendez-vous. Le devis est gratuit et le délai de fabrication indiqué sur notre site est de 6 à 8 semaines.'],['v','Do you deliver to Lyon?'],['e','Yes, we deliver and install in the Lyon area. Would you like a quote? I just need your name, email and a short description.'],['n','Demande transmise à l\'équipe']]},
+en:{n:'Marchand Workshop',m:[['v','Do you quote for custom kitchens?'],['e','Yes, by appointment. The quote is free and the production time stated on our site is 6 to 8 weeks.'],['v','Livrez-vous à Lyon ?'],['e','Oui, nous livrons et installons dans la région lyonnaise. Souhaitez-vous un devis ? Il me faut seulement votre nom, votre email et une courte description.'],['n','Request sent to the team']]}};
+var CASES={fr:[
+{k:'Restaurant',t:'Un restaurant',d:'Les mêmes questions reviennent chaque jour. Echo y répond pendant que l\'équipe est en service.',l:['Horaires, carte, allergènes indiqués sur le site','Réservation : renvoi vers votre téléphone ou votre outil','Questions en anglais ou en allemand pour les touristes'],m:[['v','Avez-vous des plats sans gluten ?'],['e','Oui, la carte signale 4 plats sans gluten. Pour une allergie sévère, prévenez l\'équipe à la réservation.'],['v','Ouvert dimanche soir ?'],['e','Le site indique une fermeture le dimanche soir. Pour confirmer, appelez directement le restaurant.']]},
+{k:'Cabinet',t:'Un cabinet de conseil',d:'Les visiteurs veulent savoir si vous pouvez les aider avant d\'appeler.',l:['Domaines d\'intervention et déroulé d\'un premier rendez-vous','Prise de contact qualifiée : nom, email, besoin','Aucun conseil personnalisé : renvoi vers le cabinet'],m:[['v','Intervenez-vous en droit des sociétés ?'],['e','Oui, c\'est l\'un des domaines présentés sur le site. Souhaitez-vous qu\'un associé vous recontacte ? Quel est votre nom ?']]},
+{k:'Artisan',t:'Un artisan',d:'Un devis demande souvent trois échanges. Echo recueille les informations utiles avant votre appel.',l:['Zone d\'intervention et types de chantiers','Demande de devis avec description du besoin','Réponses en dehors de vos heures de chantier'],m:[['v','Vous intervenez à Annecy ?'],['e','Oui, Annecy fait partie de notre zone d\'intervention. Quel type de travaux avez-vous en tête ?']]},
+{k:'Boutique',t:'Une boutique en ligne',d:'Livraison, retours, tailles : des questions simples qui bloquent un achat.',l:['Conditions de livraison et de retour du site','Orientation vers la bonne fiche produit','Questions d\'acheteurs étrangers'],m:[['v','Quel est le délai de retour ?'],['e','Le site indique 30 jours après réception, produit non utilisé. Les détails sont sur la page Retours.']]}],
+en:[
+{k:'Restaurant',t:'A restaurant',d:'The same questions come back every day. Echo answers them while your team is busy serving.',l:['Hours, menu and allergens listed on the site','Booking: points to your phone or booking tool','Questions in English or German from tourists'],m:[['v','Do you have gluten-free dishes?'],['e','Yes, the menu marks 4 gluten-free dishes. For a severe allergy, please tell the team when you book.'],['v','Open Sunday night?'],['e','The site says the restaurant is closed on Sunday evenings. To confirm, please call directly.']]},
+{k:'Firm',t:'A consulting firm',d:'Visitors want to know whether you can help before they call.',l:['Practice areas and what a first meeting looks like','Qualified contact: name, email, need','No personalised advice: points back to the firm'],m:[['v','Do you handle company law?'],['e','Yes, it is one of the areas listed on the site. Would you like a partner to contact you? What is your name?']]},
+{k:'Tradesperson',t:'A tradesperson',d:'A quote often takes three exchanges. Echo gathers the useful details before your call.',l:['Service area and types of jobs','Quote request with a description of the need','Answers outside your working hours'],m:[['v','Do you work in Annecy?'],['e','Yes, Annecy is part of our service area. What kind of work do you have in mind?']]},
+{k:'Shop',t:'An online shop',d:'Delivery, returns, sizes: simple questions that stall a purchase.',l:['Delivery and return terms from the site','Pointing to the right product page','Questions from foreign buyers'],m:[['v','What is the return period?'],['e','The site says 30 days after delivery, for unused items. Details are on the Returns page.']]}]};
+function L(){return h.lang==='en'?'en':'fr'}
+function bub(c,k,t){var d=document.createElement('div');d.className='b '+k;d.textContent=t;c.appendChild(d);return d}
+var heroTimer=null,heroRun=0;
+function playHero(){clearTimeout(heroTimer);var run=++heroRun,c=$('hlog'),D=HERO[L()];c.innerHTML='';$('hn').textContent=D.n;var i=0;
+ function step(){if(run!==heroRun)return;if(i>=D.m.length){heroTimer=setTimeout(playHero,7000);return}var m=D.m[i++];bub(c,m[0],m[1]);heroTimer=setTimeout(step,m[0]==='v'?1100:1900)}
+ if(reduce){D.m.forEach(function(m){bub(c,m[0],m[1])});return}
+ heroTimer=setTimeout(step,500)}
+var cur=0;
+function renderCases(){var D=CASES[L()],t=$('tabs');t.innerHTML='';D.forEach(function(c,i){var b=document.createElement('button');b.type='button';b.setAttribute('role','tab');b.setAttribute('aria-selected',i===cur);b.textContent=c.k;b.onclick=function(){cur=i;renderCases()};t.appendChild(b)});
+ var c=D[cur],k=$('case');k.innerHTML='';var tx=document.createElement('div');tx.className='tx';var hh=document.createElement('h3');hh.textContent=c.t;var p=document.createElement('p');p.textContent=c.d;var ul=document.createElement('ul');c.l.forEach(function(x){var li=document.createElement('li');li.textContent=x;ul.appendChild(li)});tx.appendChild(hh);tx.appendChild(p);tx.appendChild(ul);
+ var mk=document.createElement('div');mk.className='mock';var lg=document.createElement('div');lg.className='log';c.m.forEach(function(m){bub(lg,m[0],m[1])});mk.appendChild(lg);k.appendChild(mk);k.appendChild(tx)}
+function setLang(l){h.lang=l;$('lg').textContent=l==='fr'?'EN':'FR';$('u').placeholder=l==='fr'?'www.votre-site.fr':'www.your-site.com';try{localStorage.setItem('echo_lang',l)}catch(e){}renderCases();playHero()}
+var saved=null;try{saved=localStorage.getItem('echo_lang')}catch(e){}
+setLang(saved||(/^fr/i.test(navigator.language||'')?'fr':'en'));
+$('lg').onclick=function(){setLang(L()==='fr'?'en':'fr')};
+$('lt').onclick=function(e){e.preventDefault();var l=$('legal');l.style.display=l.style.display==='block'?'none':'block';if(l.style.display==='block')l.scrollIntoView({behavior:'smooth',block:'nearest'})};
+var T={fr:{wait:'Lecture de votre site en cours...',url:'Entrez l\'adresse de votre site.',fetch:'Impossible de lire ce site. Il est peut-être protégé ou inaccessible.',empty:'Ce site contient trop peu de texte lisible. Il est peut-être chargé par script ou composé d\'images.',limit:'Trop de demandes. Réessayez plus tard.',err:'Une erreur est survenue. Réessayez.',ok:'Votre assistant est prêt. Posez-lui une question sur votre activité.'},
+en:{wait:'Reading your site...',url:'Enter your website address.',fetch:'Could not read this site. It may be protected or unreachable.',empty:'This site has too little readable text. It may be script-rendered or image-based.',limit:'Too many requests. Try again later.',err:'Something went wrong. Try again.',ok:'Your assistant is ready. Ask it a question about your business.'}};
+$('df').onsubmit=function(e){e.preventDefault();var u=$('u').value.trim(),t=T[L()],b=$('go');if(!u){$('msg').textContent=t.url;return}
+ b.disabled=true;$('msg').textContent=t.wait;$('frame').style.display='none';
+ fetch('/api/demo',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({url:u})}).then(function(r){return r.json().then(function(j){return{s:r.status,j:j}})}).then(function(x){
+  if(x.j&&x.j.id){$('msg').textContent=t.ok;var f=$('frame');f.src='/c/'+x.j.id;f.style.display='block';f.scrollIntoView({behavior:'smooth',block:'nearest'})}
+  else $('msg').textContent=x.s===429?t.limit:(t[x.j&&x.j.error]||t.err)}).catch(function(){$('msg').textContent=t.err}).then(function(){b.disabled=false})};
+var chatF=null;
+function openChat(){if(!chatF){chatF=document.createElement('iframe');chatF.src='/c/echo';chatF.title='Echo';chatF.style.cssText='position:fixed;right:max(16px,env(safe-area-inset-right));bottom:16px;z-index:50;width:min(390px,calc(100vw - 32px));height:min(580px,calc(100vh - 32px));border:1px solid #d6dee7;border-radius:18px;box-shadow:0 24px 70px rgba(0,0,0,.4);background:#fff';var x=document.createElement('button');x.textContent='✕';x.setAttribute('aria-label','Close');x.style.cssText='position:fixed;right:max(24px,env(safe-area-inset-right));bottom:min(600px,calc(100vh - 48px));z-index:51;width:30px;height:30px;border-radius:50%;border:0;background:#0b1f33;color:#fff;cursor:pointer;box-shadow:0 2px 8px rgba(0,0,0,.4)';x.onclick=function(){chatF.style.display='none';x.style.display='none'};chatF._x=x;document.body.appendChild(chatF);document.body.appendChild(x)}
+ chatF.style.display='block';chatF._x.style.display='block'}
+document.querySelectorAll('.ask').forEach(function(b){b.onclick=openChat});
+</script>
+</body>
+</html>
