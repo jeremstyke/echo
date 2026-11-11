@@ -244,6 +244,7 @@ footer .top{display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap}
 </div></div></footer>
 
 <script>
+var API=/github\.io$/.test(location.hostname)?'https://echo-production-40b463c3.up.railway.app':'';
 var h=document.documentElement,$=function(x){return document.getElementById(x)};
 var reduce=window.matchMedia&&matchMedia('(prefers-reduced-motion: reduce)').matches;
 var HERO={fr:{n:'Atelier Marchand',m:[['v','Vous faites des devis pour une cuisine sur mesure ?'],['e','Oui, sur rendez-vous. Le devis est gratuit et le délai de fabrication indiqué sur notre site est de 6 à 8 semaines.'],['v','Do you deliver to Lyon?'],['e','Yes, we deliver and install in the Lyon area. Would you like a quote? I just need your name, email and a short description.'],['n','Demande transmise à l\'équipe']]},
@@ -269,7 +270,7 @@ var cur=0;
 function renderCases(){var D=CASES[L()],t=$('tabs');t.innerHTML='';D.forEach(function(c,i){var b=document.createElement('button');b.type='button';b.setAttribute('role','tab');b.setAttribute('aria-selected',i===cur);b.textContent=c.k;b.onclick=function(){cur=i;renderCases()};t.appendChild(b)});
  var c=D[cur],k=$('case');k.innerHTML='';var tx=document.createElement('div');tx.className='tx';var hh=document.createElement('h3');hh.textContent=c.t;var p=document.createElement('p');p.textContent=c.d;var ul=document.createElement('ul');c.l.forEach(function(x){var li=document.createElement('li');li.textContent=x;ul.appendChild(li)});tx.appendChild(hh);tx.appendChild(p);tx.appendChild(ul);
  var mk=document.createElement('div');mk.className='mock';var lg=document.createElement('div');lg.className='log';c.m.forEach(function(m){bub(lg,m[0],m[1])});mk.appendChild(lg);k.appendChild(mk);k.appendChild(tx)}
-function setLang(l){h.lang=l;$('lg').textContent=l==='fr'?'EN':'FR';$('u').placeholder=l==='fr'?'www.votre-site.fr':'www.your-site.com';try{localStorage.setItem('echo_lang',l)}catch(e){}var bl=document.querySelector('nav a[href^="/blog"]');if(bl)bl.href=l==='en'?'/blog?lang=en':'/blog';renderCases();playHero()}
+function setLang(l){h.lang=l;$('lg').textContent=l==='fr'?'EN':'FR';$('u').placeholder=l==='fr'?'www.votre-site.fr':'www.your-site.com';try{localStorage.setItem('echo_lang',l)}catch(e){}var bl=document.querySelector('nav a[href^="/blog"]');if(bl)bl.href=API+(l==='en'?'/blog?lang=en':'/blog');renderCases();playHero()}
 var saved=null;try{saved=localStorage.getItem('echo_lang')}catch(e){}
 setLang(saved||(/^fr/i.test(navigator.language||'')?'fr':'en'));
 $('lg').onclick=function(){setLang(L()==='fr'?'en':'fr')};
@@ -278,11 +279,11 @@ var T={fr:{wait:'Lecture de votre site en cours...',url:'Entrez l\'adresse de vo
 en:{wait:'Reading your site...',url:'Enter your website address.',fetch:'Could not read this site. It may be protected or unreachable.',empty:'This site has too little readable text. It may be script-rendered or image-based.',limit:'Too many requests. Try again later.',err:'Something went wrong. Try again.',ok:'Your assistant is ready. Ask it a question about your business.'}};
 $('df').onsubmit=function(e){e.preventDefault();var u=$('u').value.trim(),t=T[L()],b=$('go');if(!u){$('msg').textContent=t.url;return}
  b.disabled=true;$('msg').textContent=t.wait;$('frame').style.display='none';
- fetch('/api/demo',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({url:u})}).then(function(r){return r.json().then(function(j){return{s:r.status,j:j}})}).then(function(x){
-  if(x.j&&x.j.id){$('msg').textContent=t.ok;var f=$('frame');f.src='/c/'+x.j.id;f.style.display='block';f.scrollIntoView({behavior:'smooth',block:'nearest'})}
+ fetch(API+'/api/demo',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({url:u})}).then(function(r){return r.json().then(function(j){return{s:r.status,j:j}})}).then(function(x){
+  if(x.j&&x.j.id){$('msg').textContent=t.ok;var f=$('frame');f.src=API+'/c/'+x.j.id;f.style.display='block';f.scrollIntoView({behavior:'smooth',block:'nearest'})}
   else $('msg').textContent=x.s===429?t.limit:(t[x.j&&x.j.error]||t.err)}).catch(function(){$('msg').textContent=t.err}).then(function(){b.disabled=false})};
 var chatF=null;
-function openChat(){if(!chatF){chatF=document.createElement('iframe');chatF.src='/c/echo';chatF.title='Echo';chatF.style.cssText='position:fixed;right:max(16px,env(safe-area-inset-right));bottom:16px;z-index:50;width:min(390px,calc(100vw - 32px));height:min(580px,calc(100vh - 32px));border:1px solid #d6dee7;border-radius:18px;box-shadow:0 24px 70px rgba(0,0,0,.4);background:#fff';var x=document.createElement('button');x.textContent='✕';x.setAttribute('aria-label','Close');x.style.cssText='position:fixed;right:max(24px,env(safe-area-inset-right));bottom:min(600px,calc(100vh - 48px));z-index:51;width:30px;height:30px;border-radius:50%;border:0;background:#0b1f33;color:#fff;cursor:pointer;box-shadow:0 2px 8px rgba(0,0,0,.4)';x.onclick=function(){chatF.style.display='none';x.style.display='none'};chatF._x=x;document.body.appendChild(chatF);document.body.appendChild(x)}
+function openChat(){if(!chatF){chatF=document.createElement('iframe');chatF.src=API+'/c/echo';chatF.title='Echo';chatF.style.cssText='position:fixed;right:max(16px,env(safe-area-inset-right));bottom:16px;z-index:50;width:min(390px,calc(100vw - 32px));height:min(580px,calc(100vh - 32px));border:1px solid #d6dee7;border-radius:18px;box-shadow:0 24px 70px rgba(0,0,0,.4);background:#fff';var x=document.createElement('button');x.textContent='✕';x.setAttribute('aria-label','Close');x.style.cssText='position:fixed;right:max(24px,env(safe-area-inset-right));bottom:min(600px,calc(100vh - 48px));z-index:51;width:30px;height:30px;border-radius:50%;border:0;background:#0b1f33;color:#fff;cursor:pointer;box-shadow:0 2px 8px rgba(0,0,0,.4)';x.onclick=function(){chatF.style.display='none';x.style.display='none'};chatF._x=x;document.body.appendChild(chatF);document.body.appendChild(x)}
  chatF.style.display='block';chatF._x.style.display='block'}
 document.querySelectorAll('.ask').forEach(function(b){b.onclick=openChat});
 </script>

@@ -334,6 +334,16 @@ if (import.meta.main) {
     port: Number(Bun.env.PORT || 3000),
     idleTimeout: 60,
     async fetch(req) {
+      const origin = req.headers.get("origin") || "";
+      const okOrigin = origin === "https://jeremstyke.github.io";
+      if (req.method === "OPTIONS") return new Response(null, { status: 204, headers: okOrigin ? { "Access-Control-Allow-Origin": origin, "Access-Control-Allow-Methods": "POST, GET", "Access-Control-Allow-Headers": "Content-Type", "Access-Control-Max-Age": "86400" } : {} });
+      const res = await handle(req);
+      if (okOrigin) res.headers.set("Access-Control-Allow-Origin", origin);
+      return res;
+    },
+  });
+}
+async function handle(req: Request): Promise<Response> {
       const url = new URL(req.url);
       try {
         if (req.method === "GET") {
@@ -360,6 +370,4 @@ if (import.meta.main) {
         if (url.pathname === "/api/chat") return chat(req, body);
         return new Response("Not found", { status: 404 });
       } catch (e) { console.log("err", e); return J({ error: "server" }, 500); }
-    },
-  });
 }
