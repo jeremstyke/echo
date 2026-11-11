@@ -107,6 +107,7 @@ function decodeEntities(s: string) {
 export function extract(html: string, base: URL) {
   const title = decodeEntities((html.match(/<title[^>]*>([\s\S]*?)<\/title>/i)?.[1] || "")).replace(/\s+/g, " ").trim().slice(0, 120);
   const desc = decodeEntities(html.match(/<meta[^>]+name=["']description["'][^>]*content=["']([^"']*)["']/i)?.[1] || html.match(/<meta[^>]+content=["']([^"']*)["'][^>]*name=["']description["']/i)?.[1] || "").trim().slice(0, 300);
+  const siteName = decodeEntities(html.match(/<meta[^>]+property=["']og:site_name["'][^>]*content=["']([^"']*)["']/i)?.[1] || html.match(/<meta[^>]+content=["']([^"']*)["'][^>]*property=["']og:site_name["']/i)?.[1] || "").trim().slice(0, 80);
   const lang = (html.match(/<html[^>]*\slang=["']?([a-zA-Z]{2})/i)?.[1] || "").toLowerCase();
   const links: string[] = [];
   for (const m of html.matchAll(/<a\s[^>]*href=["']([^"'#]+)["']/gi)) {
@@ -117,7 +118,7 @@ export function extract(html: string, base: URL) {
   let t = html.replace(/<(script|style|noscript|svg|template|iframe|nav|footer)[\s\S]*?<\/\1>/gi, " ").replace(/<!--[\s\S]*?-->/g, " ");
   t = t.replace(/<\/(p|div|li|h[1-6]|tr|section|article|ul|table)>/gi, "\n").replace(/<br\s*\/?>/gi, "\n").replace(/<[^>]+>/g, " ");
   t = decodeEntities(t).replace(/[ \t\f\v ]+/g, " ").replace(/\n[ \t]*/g, "\n").replace(/\n{2,}/g, "\n").trim();
-  return { title, desc, lang, links, emails, phones, text: t };
+  return { title, siteName, desc, lang, links, emails, phones, text: t };
 }
 const KEY_LINKS = /contact|tarif|prix|price|pricing|faq|about|propos|service|prestation|horaire|hours|menu|carte|offre|offer|produit|product|equipe|team|reserv|rdv|booking|cabinet|boutique|shop/i;
 function pickLinks(links: string[], base: URL) {
@@ -140,7 +141,7 @@ export async function readSite(url: string) {
     content += block; total += block.length;
   }
   if (emails.length || phones.length) content += `CONTACT DETAILS FOUND ON THE SITE: ${[...emails, ...phones].join(", ")}\n`;
-  return { title: p0.title, lang: p0.lang, host: first.url.host, content: content.trim(), textLen: pages.reduce((s, p) => s + p.text.length, 0) };
+  return { title: p0.title, siteName: p0.siteName, lang: p0.lang, host: first.url.host, content: content.trim(), textLen: pages.reduce((s, p) => s + p.text.length, 0) };
 }
 
 // ---------- Claude ----------
@@ -190,7 +191,12 @@ async function saveLead(ip: string, msgs: { role: string; content: string }[], n
 
 // ---------- API ----------
 const newId = () => Array.from(crypto.getRandomValues(new Uint8Array(8)), b => "abcdefghjkmnpqrstuvwxyz23456789"[b % 31]).join("");
-const nameOf = (title: string, host: string) => (title.split(/\s[-|–—:·»]\s|\s[|]\s/)[0] || host).trim().slice(0, 60) || host;
+const GENERIC = /^(accueil|home|homepage|welcome|bienvenue|index|page d.accueil|main|menu)$/i;
+const nameOf = (title: string, host: string, siteName = "") => {
+  if (siteName.trim() && !GENERIC.test(siteName.trim())) return siteName.trim().slice(0, 60);
+  const parts = title.split(/\s[-|–—:·»]\s|\s[|]\s/).map(x => x.trim()).filter(Boolean);
+  return (parts.find(x => !GENERIC.test(x)) || host).slice(0, 60);
+};
 async function demo(req: Request, body: any) {
   const ip = ipOf(req);
   if (!allow("d:" + ip, 6) || !allow("g:demo", 250)) return J({ error: "limit" }, 429);
@@ -202,7 +208,7 @@ async function demo(req: Request, body: any) {
   let s: Awaited<ReturnType<typeof readSite>>;
   try { s = await readSite(u.href); } catch (e: any) { console.log("read err", u.host, String(e?.message || e).slice(0, 80)); return J({ error: "fetch" }, 422); }
   if (s.textLen < 200) return J({ error: "empty" }, 422);
-  const id = newId(), name = nameOf(s.title, s.host);
+  const id = newId(), name = nameOf(s.title, s.host, s.siteName);
   const lang = s.lang === "fr" ? "fr" : "en";
   await sb("echo_sites", { method: "POST", headers: { Prefer: "return=minimal" }, body: JSON.stringify({ id, url: u.href, host: s.host, title: name, content: s.content, lang, ip_hash: ip }) });
   return J({ id, title: name, host: s.host, lang });
