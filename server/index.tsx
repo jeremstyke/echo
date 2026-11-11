@@ -148,7 +148,7 @@ async function claude(system: string, messages: { role: string; content: string 
   const r = await fetch("https://api.anthropic.com/v1/messages", {
     method: "POST", signal: AbortSignal.timeout(40000),
     headers: { "x-api-key": AKEY, "anthropic-version": "2023-06-01", "content-type": "application/json" },
-    body: JSON.stringify({ model: MODEL, max_tokens: max, temperature: 0.3, system, messages }),
+    body: JSON.stringify({ model: MODEL, max_tokens: max, system, messages }),
   });
   if (!r.ok) { console.log("anthropic", r.status, (await r.text()).slice(0, 200)); throw new Error("api"); }
   const j: any = await r.json();
