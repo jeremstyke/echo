@@ -143,7 +143,7 @@ footer .top{display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap}
 <a class="sk" href="#demo"><span data-l="fr">Aller à la démo</span><span data-l="en">Skip to demo</span></a>
 <header><div class="w">
 <a class="logo" href="#top" aria-label="Echo"><svg viewBox="0 0 32 32" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" aria-hidden="true"><circle cx="9" cy="16" r="3" fill="currentColor" stroke="none"/><path d="M16 9.5a9 9 0 0 1 0 13"/><path d="M22 5a16 16 0 0 1 0 22" opacity=".55"/></svg>Echo</a>
-<nav><a class="h" href="#sectors"><span data-l="fr">Cas d'usage</span><span data-l="en">Use cases</span></a><a class="h" href="#how"><span data-l="fr">Fonctionnement</span><span data-l="en">How it works</span></a><a class="h" href="#pricing"><span data-l="fr">Tarifs</span><span data-l="en">Pricing</span></a><button class="lang" id="lg" aria-label="Language">EN</button><a class="btn" href="#demo" style="padding:9px 16px"><span data-l="fr">Essayer</span><span data-l="en">Try it</span></a></nav>
+<nav><a class="h" href="#sectors"><span data-l="fr">Cas d'usage</span><span data-l="en">Use cases</span></a><a class="h" href="#how"><span data-l="fr">Fonctionnement</span><span data-l="en">How it works</span></a><a class="h" href="#pricing"><span data-l="fr">Tarifs</span><span data-l="en">Pricing</span></a><a class="h" href="/blog">Blog</a><button class="lang" id="lg" aria-label="Language">EN</button><a class="btn" href="#demo" style="padding:9px 16px"><span data-l="fr">Essayer</span><span data-l="en">Try it</span></a></nav>
 </div></header>
 
 <main id="top">
@@ -269,7 +269,7 @@ var cur=0;
 function renderCases(){var D=CASES[L()],t=$('tabs');t.innerHTML='';D.forEach(function(c,i){var b=document.createElement('button');b.type='button';b.setAttribute('role','tab');b.setAttribute('aria-selected',i===cur);b.textContent=c.k;b.onclick=function(){cur=i;renderCases()};t.appendChild(b)});
  var c=D[cur],k=$('case');k.innerHTML='';var tx=document.createElement('div');tx.className='tx';var hh=document.createElement('h3');hh.textContent=c.t;var p=document.createElement('p');p.textContent=c.d;var ul=document.createElement('ul');c.l.forEach(function(x){var li=document.createElement('li');li.textContent=x;ul.appendChild(li)});tx.appendChild(hh);tx.appendChild(p);tx.appendChild(ul);
  var mk=document.createElement('div');mk.className='mock';var lg=document.createElement('div');lg.className='log';c.m.forEach(function(m){bub(lg,m[0],m[1])});mk.appendChild(lg);k.appendChild(mk);k.appendChild(tx)}
-function setLang(l){h.lang=l;$('lg').textContent=l==='fr'?'EN':'FR';$('u').placeholder=l==='fr'?'www.votre-site.fr':'www.your-site.com';try{localStorage.setItem('echo_lang',l)}catch(e){}renderCases();playHero()}
+function setLang(l){h.lang=l;$('lg').textContent=l==='fr'?'EN':'FR';$('u').placeholder=l==='fr'?'www.votre-site.fr':'www.your-site.com';try{localStorage.setItem('echo_lang',l)}catch(e){}var bl=document.querySelector('nav a[href^="/blog"]');if(bl)bl.href=l==='en'?'/blog?lang=en':'/blog';renderCases();playHero()}
 var saved=null;try{saved=localStorage.getItem('echo_lang')}catch(e){}
 setLang(saved||(/^fr/i.test(navigator.language||'')?'fr':'en'));
 $('lg').onclick=function(){setLang(L()==='fr'?'en':'fr')};

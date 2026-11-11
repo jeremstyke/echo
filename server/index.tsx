@@ -42,6 +42,16 @@ async function cfg(k: string, ttl = 60000) {
   if (v) cfgCache.set(k, { v, at: Date.now() });
   return v || c?.v || "";
 }
+// Page d'accueil : lue depuis le dépôt public (site/index.html), cache 60 s, repli sur la table echo_config (clé html)
+let homeCache = { v: "", at: 0 };
+async function homeHtml() {
+  if (homeCache.v && Date.now() - homeCache.at < 60000) return homeCache.v;
+  try {
+    const r = await fetch("https://raw.githubusercontent.com/jeremstyke/echo/main/site/index.html", { signal: AbortSignal.timeout(5000) });
+    if (r.ok) { const t = await r.text(); if (t.includes("<html")) { homeCache = { v: t, at: Date.now() }; return t; } }
+  } catch {}
+  return homeCache.v || (await cfg("html", 30000));
+}
 const siteCache = new Map<string, { row: any; at: number }>();
 async function getSite(id: string) {
   const c = siteCache.get(id);
@@ -276,6 +286,47 @@ async function site(url: URL) {
   return J({ title: s.title, greeting: fr ? `Bonjour ! Je suis l'assistant de ${s.title}. Posez-moi vos questions.` : `Hi! I'm the assistant of ${s.title}. Ask me your questions.` });
 }
 
+// ---------- blog (articles dans la table echo_posts, écrits par Jeremy / Claude, HTML de confiance) ----------
+const esc = (s: string) => String(s).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
+const BLOG_CSS = `:root{--bg:#f2f5f8;--sf:#fff;--ink:#0b1f33;--mut:#53657a;--line:#d6dee7;--co:#1f4fff;--coi:#fff}@media(prefers-color-scheme:dark){:root{--bg:#08141f;--sf:#0f2132;--ink:#eaf0f7;--mut:#9fb2c7;--line:#223a52;--co:#6d8dff;--coi:#06122b;color-scheme:dark}}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font:17px/1.75 "Instrument Sans",system-ui,sans-serif}a{color:var(--co)}
+h1,h2,h3{font-family:"Bricolage Grotesque","Instrument Sans",sans-serif;line-height:1.15;letter-spacing:-.02em;text-wrap:balance}
+header{border-bottom:1px solid var(--line)}.w{max-width:720px;margin:0 auto;padding:0 max(20px,env(safe-area-inset-left))}
+header .w{display:flex;justify-content:space-between;align-items:center;height:60px}.logo{font:800 22px "Bricolage Grotesque";text-decoration:none;color:var(--ink)}header a.n{font-size:15px;text-decoration:none;color:var(--mut)}
+main{padding:44px 0 64px}h1{font-size:clamp(30px,5vw,44px);margin:0 0 14px}h2{font-size:26px;margin:2em 0 .4em}p,li{color:var(--ink)}.mut{color:var(--mut);font-size:15px}
+.post{display:block;padding:22px 0;border-top:1px solid var(--line);text-decoration:none;color:inherit}.post h2{margin:0 0 6px;font-size:24px}.post p{margin:0;color:var(--mut)}
+.cta{margin-top:48px;padding:26px;border:1px solid var(--line);border-radius:14px;background:var(--sf)}.cta a.b{display:inline-block;margin-top:10px;background:var(--co);color:var(--coi);padding:12px 20px;border-radius:10px;text-decoration:none;font-weight:600}
+footer{padding:28px 0;font-size:14px;color:var(--mut);border-top:1px solid var(--line)}`;
+function blogShell(title: string, descr: string, inner: string, lang: string, canonical: string, extraHead = "") {
+  const fr = lang === "fr";
+  return `<!doctype html><html lang="${lang}"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>${esc(title)}</title><meta name="description" content="${esc(descr)}"><link rel="canonical" href="${esc(canonical)}"><meta property="og:title" content="${esc(title)}"><meta property="og:description" content="${esc(descr)}"><meta property="og:type" content="article">${extraHead}<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,700;12..96,800&family=Instrument+Sans:wght@400;500;600&display=swap" rel="stylesheet"><style>${BLOG_CSS}</style></head><body><header><div class="w"><a class="logo" href="/">Echo</a><a class="n" href="/blog${fr ? "" : "?lang=en"}">Blog</a></div></header><main class="w">${inner}</main><footer><div class="w">© 2026 Echo · <a href="/">${fr ? "Accueil" : "Home"}</a></div></footer></body></html>`;
+}
+async function blogList(url: URL) {
+  const lang = url.searchParams.get("lang") === "en" ? "en" : "fr";
+  const rows: any[] = await sb(`echo_posts?lang=eq.${lang}&select=slug,title,descr,created_at&order=created_at.desc&limit=100`).catch(() => []);
+  const fr = lang === "fr";
+  const items = rows.map(p => `<a class="post" href="/blog/${esc(p.slug)}"><h2>${esc(p.title)}</h2><p>${esc(p.descr)}</p></a>`).join("") || `<p class="mut">${fr ? "Les premiers articles arrivent bientôt." : "The first articles are coming soon."}</p>`;
+  const other = `<a href="/blog${fr ? "?lang=en" : ""}">${fr ? "Read in English" : "Lire en français"}</a>`;
+  const inner = `<h1>${fr ? "Le blog d'Echo" : "The Echo blog"}</h1><p class="mut">${fr ? "Assistant IA, relation client et sites d'entreprise." : "AI assistants, customer service and business websites."} ${other}</p><div style="margin-top:24px">${items}</div>`;
+  return html(blogShell(fr ? "Blog Echo | Assistant IA pour sites d'entreprise" : "Echo blog | AI assistants for business websites", fr ? "Conseils pratiques sur les assistants IA, la relation client et les sites d'entreprise." : "Practical advice on AI assistants, customer service and business websites.", inner, lang, url.origin + "/blog" + (fr ? "" : "?lang=en")));
+}
+async function blogPost(url: URL, slug: string) {
+  if (!/^[a-z0-9-]{3,100}$/.test(slug)) return new Response("Not found", { status: 404 });
+  const r: any[] = await sb(`echo_posts?slug=eq.${slug}&select=slug,lang,title,descr,body,created_at`).catch(() => []);
+  const p = r[0]; if (!p) return new Response("Not found", { status: 404 });
+  const fr = p.lang === "fr";
+  const canon = `${url.origin}/blog/${p.slug}`;
+  const ld = `<script type="application/ld+json">${JSON.stringify({ "@context": "https://schema.org", "@type": "Article", headline: p.title, description: p.descr, datePublished: p.created_at, inLanguage: p.lang, mainEntityOfPage: canon, author: { "@type": "Person", name: "Jérémy Dacier-Jury" } }).replace(/</g, "\\u003c")}</script>`;
+  const date = new Date(p.created_at).toLocaleDateString(fr ? "fr-FR" : "en-GB", { year: "numeric", month: "long", day: "numeric" });
+  const inner = `<p class="mut"><a href="/blog${fr ? "" : "?lang=en"}">← Blog</a> · ${date}</p><h1>${esc(p.title)}</h1><article>${p.body}</article><div class="cta"><b>${fr ? "Essayez Echo sur votre site" : "Try Echo on your site"}</b><br><span class="mut">${fr ? "Collez votre adresse et discutez avec un assistant construit sur vos pages, gratuitement." : "Paste your address and chat with an assistant built from your pages, for free."}</span><br><a class="b" href="/#demo">${fr ? "Créer ma démo" : "Create my demo"}</a></div>`;
+  return html(blogShell(p.title + " | Echo", p.descr, inner, p.lang, canon, ld));
+}
+async function sitemap(url: URL) {
+  const rows: any[] = await sb(`echo_posts?select=slug,created_at&order=created_at.desc&limit=500`).catch(() => []);
+  const u = [`<url><loc>${url.origin}/</loc></url>`, `<url><loc>${url.origin}/blog</loc></url>`, `<url><loc>${url.origin}/blog?lang=en</loc></url>`, ...rows.map(p => `<url><loc>${url.origin}/blog/${esc(p.slug)}</loc><lastmod>${String(p.created_at).slice(0, 10)}</lastmod></url>`)];
+  return new Response(`<?xml version="1.0" encoding="UTF-8"?><urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">${u.join("")}</urlset>`, { headers: { "Content-Type": "application/xml" } });
+}
+
 const html = (b: string, extra: Record<string, string> = {}) => new Response(b, { headers: { "Content-Type": "text/html; charset=utf-8", "Cache-Control": "no-cache", ...extra } });
 
 if (import.meta.main) {
@@ -287,7 +338,7 @@ if (import.meta.main) {
       try {
         if (req.method === "GET") {
           if (url.pathname === "/health") return J({ ok: true });
-          if (url.pathname === "/" ) return html((await cfg("html", 30000)) || "<h1>Echo</h1>");
+          if (url.pathname === "/" ) return html((await homeHtml()) || "<h1>Echo</h1>");
           if (url.pathname === "/widget.js") return new Response(WIDGET_JS, { headers: { "Content-Type": "application/javascript; charset=utf-8", "Cache-Control": "public, max-age=300", "Access-Control-Allow-Origin": "*" } });
           if (url.pathname.startsWith("/c/")) {
             const id = url.pathname.slice(3).replace(/[^a-z0-9]/gi, "").toLowerCase();
@@ -295,7 +346,10 @@ if (import.meta.main) {
             return html(CHAT_PAGE.replace("__ID__", id), { "Content-Security-Policy": "frame-ancestors *" });
           }
           if (url.pathname === "/api/site") return site(url);
-          if (url.pathname === "/robots.txt") return new Response("User-agent: *\nDisallow: /c/\nDisallow: /api/\n", { headers: { "Content-Type": "text/plain" } });
+          if (url.pathname === "/blog" || url.pathname === "/blog/") return blogList(url);
+          if (url.pathname.startsWith("/blog/")) return blogPost(url, url.pathname.slice(6));
+          if (url.pathname === "/sitemap.xml") return sitemap(url);
+          if (url.pathname === "/robots.txt") return new Response(`User-agent: *\nDisallow: /c/\nDisallow: /api/\nSitemap: ${url.origin}/sitemap.xml\n`, { headers: { "Content-Type": "text/plain" } });
           return new Response("Not found", { status: 404 });
         }
         if (req.method !== "POST") return new Response("Not found", { status: 404 });
