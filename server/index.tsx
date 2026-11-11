@@ -282,7 +282,7 @@ async function site(url: URL) {
   if (id === "echo") return J({ title: "Echo", greeting: lang === "fr" ? "Bonjour ! Je suis Echo. Posez-moi vos questions sur l'assistant IA pour votre site, ou demandez un devis." : "Hi! I'm Echo. Ask me anything about the AI assistant for your website, or request a quote." });
   const s = await getSite(id);
   if (!s) return J({ error: "site" }, 404);
-  const fr = (s.lang || lang) === "fr";
+  const fr = lang === "fr";
   return J({ title: s.title, greeting: fr ? `Bonjour ! Je suis l'assistant de ${s.title}. Posez-moi vos questions.` : `Hi! I'm the assistant of ${s.title}. Ask me your questions.` });
 }
 
